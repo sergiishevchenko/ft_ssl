@@ -1,0 +1,53 @@
+# macOS
+.DS_Store
+
+# Build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.out
+*.exe
+ft_ssl
+
+# Debug / profiling artifacts
+*.dSYM/
+vgcore.*
+core
+core.*
+
+# Coverage / reports
+*.gcno
+*.gcda
+*.gcov
+coverage/
+htmlcov/
+
+# Cache
+.cache/
+cache/
+*.cache
+.ccache/
+ccache/
+CMakeCache.txt
+
+# Logs / temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Editors / IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# IntelliSense / clangd
+.clangd
+compile_commands.json
+
+# Test fixtures generated during local runs
+file
+website
