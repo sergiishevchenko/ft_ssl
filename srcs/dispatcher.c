@@ -54,7 +54,6 @@ void	print_invalid_command(const char *cmd)
 	ft_putstr_fd("ft_ssl: Error: '", 2);
 	ft_putstr_fd(cmd, 2);
 	ft_putendl_fd("' is an invalid command.", 2);
-	ft_putendl_fd("", 2);
 	ft_putendl_fd("Commands:", 2);
 	i = 0;
 	while (g_hashes[i].name_lower)
@@ -62,7 +61,6 @@ void	print_invalid_command(const char *cmd)
 		ft_putendl_fd(g_hashes[i].name_lower, 2);
 		i++;
 	}
-	ft_putendl_fd("", 2);
 	ft_putendl_fd("Flags:", 2);
 	ft_putendl_fd("-p -q -r -s", 2);
 }

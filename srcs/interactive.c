@@ -1,26 +1,5 @@
 #include "ft_ssl.h"
 
-static int	count_words(char *line)
-{
-	int	count;
-	int	in_word;
-
-	count = 0;
-	in_word = 0;
-	while (*line)
-	{
-		if (*line == ' ' || *line == '\t' || *line == '\n')
-			in_word = 0;
-		else if (!in_word)
-		{
-			in_word = 1;
-			count++;
-		}
-		line++;
-	}
-	return (count);
-}
-
 static char	*get_next_word(char **line)
 {
 	char	*start;
@@ -63,27 +42,32 @@ static char	**split_line(char *line, int *argc)
 {
 	char	**argv;
 	char	*ptr;
-	int		wc;
+	char	*word;
 	int		i;
 
-	wc = count_words(line);
-	if (wc == 0)
-	{
-		*argc = 0;
-		return (NULL);
-	}
-	argv = malloc(sizeof(char *) * (wc + 1));
+	argv = malloc(sizeof(char *) * 256);
 	if (!argv)
 		return (NULL);
 	ptr = line;
 	i = 0;
-	while (i < wc)
+	word = get_next_word(&ptr);
+	while (word)
 	{
-		argv[i] = get_next_word(&ptr);
-		i++;
+		if (i >= 255)
+		{
+			free(word);
+			break ;
+		}
+		argv[i++] = word;
+		word = get_next_word(&ptr);
 	}
 	argv[i] = NULL;
-	*argc = wc;
+	*argc = i;
+	if (i == 0)
+	{
+		free(argv);
+		return (NULL);
+	}
 	return (argv);
 }
 
@@ -98,6 +82,22 @@ static void	free_argv(char **argv, int argc)
 		i++;
 	}
 	free(argv);
+}
+
+static char	*grow_line(char *line, size_t len, size_t *cap)
+{
+	char	*tmp;
+
+	*cap *= 2;
+	tmp = malloc(*cap);
+	if (!tmp)
+	{
+		free(line);
+		return (NULL);
+	}
+	ft_memcpy(tmp, line, len);
+	free(line);
+	return (tmp);
 }
 
 static char	*read_line(void)
@@ -118,12 +118,9 @@ static char	*read_line(void)
 	{
 		if (len + 1 >= cap)
 		{
-			cap *= 2;
-			line = ft_strjoin_free(line, "", 1);
+			line = grow_line(line, len, &cap);
 			if (!line)
 				return (NULL);
-			free(line);
-			line = malloc(cap);
 		}
 		line[len++] = buf[0];
 		if (buf[0] == '\n')
@@ -139,7 +136,7 @@ static char	*read_line(void)
 	return (line);
 }
 
-static void	exec_interactive_line(char *line)
+static int	exec_interactive_line(char *line)
 {
 	char		**argv;
 	int			argc;
@@ -150,16 +147,20 @@ static void	exec_interactive_line(char *line)
 	if (!argv || argc == 0)
 	{
 		free(argv);
-		return ;
+		return (0);
+	}
+	if (ft_strcmp(argv[0], "exit") == 0
+		|| ft_strcmp(argv[0], "quit") == 0)
+	{
+		free_argv(argv, argc);
+		return (1);
 	}
 	h = find_hash(argv[0]);
 	if (!h)
 	{
-		ft_putstr_fd("ft_ssl: Error: '", 2);
-		ft_putstr_fd(argv[0], 2);
-		ft_putendl_fd("' is an invalid command.", 2);
+		print_invalid_command(argv[0]);
 		free_argv(argv, argc);
-		return ;
+		return (0);
 	}
 	ssl.hash = h;
 	ssl.argc = argc;
@@ -167,19 +168,28 @@ static void	exec_interactive_line(char *line)
 	ssl.cmd_index = 1;
 	execute_command(&ssl);
 	free_argv(argv, argc);
+	return (0);
 }
 
 int	interactive_mode(void)
 {
 	char	*line;
+	int		is_tty;
 
-	ft_putstr_fd("ft_ssl> ", 1);
+	is_tty = isatty(0);
+	if (is_tty)
+		ft_putstr_fd("ft_ssl> ", 1);
 	line = read_line();
 	while (line)
 	{
-		exec_interactive_line(line);
+		if (exec_interactive_line(line))
+		{
+			free(line);
+			break ;
+		}
 		free(line);
-		ft_putstr_fd("ft_ssl> ", 1);
+		if (is_tty)
+			ft_putstr_fd("ft_ssl> ", 1);
 		line = read_line();
 	}
 	return (0);
