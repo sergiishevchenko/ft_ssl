@@ -2,7 +2,7 @@
 
 #define MAX_STRINGS 256
 
-static void	parse_flags(t_ssl *ssl, int *i,
+static int	parse_flags(t_ssl *ssl, int *i,
 		const char **strings, int *str_count)
 {
 	*str_count = 0;
@@ -16,9 +16,17 @@ static void	parse_flags(t_ssl *ssl, int *i,
 			ssl->flags.r = 1;
 		else if (ft_strcmp(ssl->argv[*i], "-s") == 0)
 		{
-			if (*i + 1 < ssl->argc)
+			if (*i + 1 >= ssl->argc)
 			{
-				(*i)++;
+				ft_putstr_fd("ft_ssl: ", 2);
+				ft_putstr_fd(ssl->hash->name_lower, 2);
+				ft_putendl_fd(": option requires an argument -- s", 2);
+				ssl->error = 1;
+				return (1);
+			}
+			(*i)++;
+			if (*str_count < MAX_STRINGS)
+			{
 				strings[*str_count] = ssl->argv[*i];
 				(*str_count)++;
 			}
@@ -27,6 +35,7 @@ static void	parse_flags(t_ssl *ssl, int *i,
 			break ;
 		(*i)++;
 	}
+	return (0);
 }
 
 int	execute_command(t_ssl *ssl)
@@ -41,8 +50,10 @@ int	execute_command(t_ssl *ssl)
 	ssl->flags.p = 0;
 	ssl->flags.q = 0;
 	ssl->flags.r = 0;
+	ssl->error = 0;
 	had_target = 0;
-	parse_flags(ssl, &i, strings, &str_count);
+	if (parse_flags(ssl, &i, strings, &str_count))
+		return (1);
 	if (ssl->flags.p)
 		process_stdin(ssl);
 	j = 0;
@@ -60,5 +71,7 @@ int	execute_command(t_ssl *ssl)
 	}
 	if (!had_target && !ssl->flags.p)
 		process_stdin(ssl);
+	if (ssl->error)
+		return (1);
 	return (0);
 }
