@@ -34,6 +34,7 @@ typedef struct s_ssl
 	int			argc;
 	char		**argv;
 	int			cmd_index;
+	int			error;
 }	t_ssl;
 
 t_hash_func		*get_hash_functions(void);
@@ -56,7 +57,7 @@ char			*ft_strjoin_free(char *s1, char *s2, int free_s1);
 
 uint8_t			*read_fd(int fd, size_t *out_len);
 void			digest_to_hex(uint8_t *digest, int size, char *out);
-void			hash_data(t_hash_func *h, const uint8_t *data,
+int				hash_data(t_hash_func *h, const uint8_t *data,
 					size_t len, uint8_t *digest);
 
 void			process_stdin(t_ssl *ssl);
