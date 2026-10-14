@@ -1,10 +1,10 @@
-# Проверка ft_ssl шаг за шагом
+# Проверка ft_ssl
 
-Задание требует Linux. На macOS проект собирается и хеши совпадают, но эталонные `md5sum` / `sha256sum` и `valgrind` есть в Linux-виртуалке.
+На macOS проект собирается, и хеши совпадают с системными. Полный прогон удобнее делать в Linux: там есть `md5sum`, `sha256sum` и `valgrind`.
 
-Ниже — путь от пустой машины до полной сверки с subject, включая оба бонуса.
+Ниже — путь от пустой машины до проверки сборки, формата вывода, хешей, ошибок, интерактива и утечек.
 
-Эталон формата вывода — `docs/en.subject.pdf`. Хеш сравнивай с `md5sum` / `sha256sum` (первая колонка). Строку целиком (`(stdin)=`, `MD5 (file) =`) с ними не сравнивай: формат у `ft_ssl` свой.
+Хеш сравнивай с `md5sum` / `sha256sum` (первая колонка). Строку целиком (`(stdin)=`, `MD5 (file) =`) с ними не сравнивай: формат у `ft_ssl` свой.
 
 ## 1. Что понадобится
 
@@ -55,7 +55,7 @@ sha256sum --version
 valgrind --version
 ```
 
-`openssl dgst -whirlpool` на OpenSSL 3 в Ubuntu не работает. Эталон Whirlpool — векторы в разделе 10, не системный openssl.
+`openssl dgst -whirlpool` на OpenSSL 3 в Ubuntu не работает. Для Whirlpool ориентир — векторы в разделе 10.
 
 ## 4. Перенести проект
 
@@ -111,9 +111,9 @@ make fclean   # удалить .o и ft_ssl
 make re       # пересобрать с нуля
 ```
 
-## 6. Обязательная часть (как в subject)
+## 6. Формат вывода
 
-Подготовь файл из задания:
+Подготовь файл:
 
 ```bash
 echo "And above all," > file
@@ -180,7 +180,7 @@ echo "some of this will not make sense at first" | ./ft_ssl md5 file
 MD5 (file) = 53d53ea94217b259c11a5a2d104ec58a
 ```
 
-(пайп без `-p` игнорируется, хешируется только файл)
+Пайп без `-p` игнорируется, хешируется только файл.
 
 ```bash
 echo "but eventually you will understand" | ./ft_ssl md5 -p -r file
@@ -213,7 +213,7 @@ ft_ssl: md5: -s: No such file or directory
 ft_ssl: md5: bar: No such file or directory
 ```
 
-(после первого не-флага всё остальное — имена файлов, в том числе второе `-s`)
+После первого не-флага всё остальное — имена файлов, в том числе второе `-s`.
 
 ```bash
 echo "just to be extra clear" | ./ft_ssl md5 -r -q -p -s "foo" file
@@ -257,7 +257,7 @@ printf '42 is nice' | sha256sum
 
 Первая колонка `md5sum` / `sha256sum` должна совпасть с `-q` у `ft_ssl`.
 
-Пустая строка и RFC-векторы:
+Пустая строка и короткие векторы:
 
 ```bash
 ./ft_ssl md5 -q -s ""
@@ -303,9 +303,9 @@ ft_ssl: md5: option requires an argument -- s
 
 Каталог не хешируется как пустой файл.
 
-## 9. Бонус: команды со stdin
+## 9. Команды со stdin
 
-Без аргументов usage **не** печатается: его заменяет ридер команд. Приглашение `ft_ssl> ` только если stdin — терминал. Через пайп приглашения нет.
+Без аргументов программа читает команды со stdin. Приглашение `ft_ssl> ` только если stdin — терминал. Через пайп приглашения нет.
 
 Интерактив (TTY):
 
@@ -331,7 +331,7 @@ ft_ssl> exit
 
 Пустая строка ничего не делает. Неизвестная команда не завершает программу. Выход: `exit`, `quit` или Ctrl-D.
 
-Пайп (как в subject):
+Пайп:
 
 ```bash
 printf 'md5 -s "42 is nice"\nsha256 -s "42 is nice"\n' | ./ft_ssl
@@ -350,7 +350,7 @@ printf '\nfoobar\nexit\n' | ./ft_ssl
 
 Сначала ошибка на `foobar`, затем выход по `exit`. Приглашения нет.
 
-## 10. Бонус: whirlpool
+## 10. Whirlpool
 
 Те же флаги `-p -q -r -s`. Векторы ISO/IEC 10118-3:
 
@@ -366,7 +366,7 @@ printf '\nfoobar\nexit\n' | ./ft_ssl
 4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cb70c4afc72894b03123cec4a76917a3e826
 ```
 
-Формат без `-q` такой же, как у md5/sha256:
+Формат без `-q` такой же, как у md5 и sha256:
 
 ```bash
 ./ft_ssl whirlpool -s "abc"
@@ -376,7 +376,9 @@ printf '\nfoobar\nexit\n' | ./ft_ssl
 WHIRLPOOL ("abc") = 4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cb70c4afc72894b03123cec4a76917a3e826
 ```
 
-## 11. Утечки (только Linux)
+## 11. Утечки
+
+`valgrind` — только Linux.
 
 ```bash
 echo "42 is nice" | valgrind --leak-check=full --show-leak-kinds=all ./ft_ssl md5
