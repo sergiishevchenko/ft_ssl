@@ -17,13 +17,14 @@ SRCS = srcs/main.c \
        srcs/whirlpool/whirlpool_tables.c
 
 OBJS = $(SRCS:.c=.o)
+HEADERS = includes/ft_ssl.h includes/md5.h includes/sha256.h includes/whirlpool.h
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.c
+%.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
