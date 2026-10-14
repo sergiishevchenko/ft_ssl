@@ -4,6 +4,15 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 INCLUDES = -I includes
 
+RESET = \033[0m
+BOLD = \033[1m
+DIM = \033[2m
+RED = \033[31m
+GREEN = \033[32m
+YELLOW = \033[33m
+CYAN = \033[36m
+MAGENTA = \033[35m
+
 SRCS = srcs/main.c \
        srcs/utils.c \
        srcs/io.c \
@@ -22,16 +31,20 @@ HEADERS = includes/ft_ssl.h includes/md5.h includes/sha256.h includes/whirlpool.
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+	@printf "$(GREEN)$(BOLD)\n  ✓  $(NAME)$(RESET) $(DIM)ready$(RESET)\n\n"
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@printf "  $(CYAN)▸$(RESET)  $(DIM)compile$(RESET)  $(YELLOW)$<$(RESET)\n"
 
 clean:
-	rm -f $(OBJS)
+	@rm -f $(OBJS)
+	@printf "  $(MAGENTA)✕$(RESET)  $(DIM)removed object files$(RESET)\n"
 
 fclean: clean
-	rm -f $(NAME)
+	@rm -f $(NAME)
+	@printf "  $(RED)✕$(RESET)  $(DIM)removed$(RESET) $(BOLD)$(NAME)$(RESET)\n"
 
 re: fclean all
 
