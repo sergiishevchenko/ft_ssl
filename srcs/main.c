@@ -6,10 +6,7 @@ int	main(int argc, char **argv)
 	t_ssl		ssl;
 
 	if (argc < 2)
-	{
-		print_usage();
 		return (interactive_mode());
-	}
 	h = find_hash(argv[1]);
 	if (!h)
 	{
