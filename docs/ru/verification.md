@@ -75,10 +75,32 @@ cd ft_ssl
 
 ### Общая папка
 
-**UTM:** выключенная машина → **Sharing** → папка проекта на Mac. В Ubuntu обычно `/media/share`:
+**UTM:** выключенная машина → **Edit → Sharing** → Directory Share Mode: **VirtFS** → **Path**: папка на Mac. Сама она в Ubuntu не появится, её надо смонтировать по тегу `share`:
 
 ```bash
-cp -R /media/share/ft_ssl ~/ft_ssl
+sudo mkdir -p /mnt/share
+sudo mount -t 9p -o trans=virtio,version=9p2000.L share /mnt/share
+```
+
+Файлы будут принадлежать пользователю Mac (uid `501`), и писать в них из Ubuntu нельзя. Чтобы они стали твоими, перемапь владельца через `bindfs`:
+
+```bash
+sudo apt install -y bindfs
+mkdir -p ~/share
+sudo bindfs --map=501/1000:@20/@1000 /mnt/share ~/share
+```
+
+Чтобы монтировалось при загрузке, добавь в `/etc/fstab` (`<user>` — твой логин в Ubuntu):
+
+```
+share       /mnt/share         9p           trans=virtio,version=9p2000.L,rw,_netdev,nofail          0 0
+/mnt/share  /home/<user>/share fuse.bindfs  map=501/1000:@20/@1000,x-systemd.requires=/mnt/share,_netdev,nofail  0 0
+```
+
+Проверка: `sudo mount -a && ls ~/share`. Дальше копируй проект к себе, путь в кавычках:
+
+```bash
+cp -R ~/share/"ft_ssl [md5][sha256]" ~/ft_ssl
 cd ~/ft_ssl
 ```
 
