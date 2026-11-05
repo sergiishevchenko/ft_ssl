@@ -124,5 +124,3 @@ High-level layout:
 - `srcs/md5/` - MD5 core
 - `srcs/sha256/` - SHA-256 core
 - `srcs/whirlpool/` - Whirlpool core and lookup tables
-
-Dispatch uses a function-pointer table, not an `if/else` chain.
