@@ -8,18 +8,20 @@
 
 ## 1. Что понадобится
 
-- Около 20 ГБ на диске и 2 ГБ RAM под гостевую систему.
-- Ubuntu 24.04 LTS: https://ubuntu.com/download/desktop
+- Около 25 ГБ на диске и минимум 4 ГБ RAM под гостевую систему. С 2 ГБ установщик Ubuntu Desktop зависает на логотипе или чёрном экране.
+- Ubuntu 24.04 LTS или новее: https://ubuntu.com/download/desktop
+  - Mac с Apple Silicon — образ `arm64` (https://cdimage.ubuntu.com/releases/)
+  - Mac с Intel или Windows — образ `amd64`
 - Гипервизор:
   - Mac с Apple Silicon — [UTM](https://mac.getutm.app/)
   - Mac с Intel или Windows — [VirtualBox](https://www.virtualbox.org/)
 
 | Параметр | Значение |
 |---|---|
-| ОС | Ubuntu 24.04 LTS, 64-bit |
-| RAM | 2048 МБ |
-| CPU | 2 ядра |
-| Диск | 20 ГБ, динамический |
+| ОС | Ubuntu 24.04 LTS или новее, `arm64` / `amd64` |
+| RAM | 4096 МБ минимум, лучше 6144–8192 МБ |
+| CPU | 4 ядра |
+| Диск | 25 ГБ, динамический |
 | Сеть | NAT |
 
 ## 2. Создать виртуалку
@@ -28,14 +30,16 @@
 
 1. UTM → **Create a New Virtual Machine** → **Virtualize**.
 2. **Linux**, укажи ISO Ubuntu.
-3. 2048 МБ RAM, 2 ядра, диск 20 ГБ.
+3. Минимум 4096 МБ RAM (лучше 6144–8192), 4 ядра, диск 25 ГБ.
 4. Установи Ubuntu на весь диск виртуалки.
-5. После перезагрузки убери ISO из настроек, иначе установщик запустится снова.
+5. После перезагрузки убери ISO из настроек (**Edit → USB Drive / CD → Clear**), иначе установщик запустится снова.
+
+Если после меню GRUB чёрный экран: **Edit → Display** → `virtio-ramfb` вместо `virtio-gpu-pci`.
 
 ### VirtualBox
 
 1. **Создать** → имя `ft_ssl`, тип Linux, Ubuntu (64-bit).
-2. RAM 2048 МБ, диск VDI 20 ГБ, динамический.
+2. RAM минимум 4096 МБ, 4 ядра, диск VDI 25 ГБ, динамический.
 3. **Носители** → оптический привод → ISO Ubuntu.
 4. **Сеть** → адаптер 1 → NAT.
 5. Установи Ubuntu. Затем **Устройства → Оптические диски → Извлечь диск**, перезагрузка.
