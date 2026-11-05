@@ -6,6 +6,17 @@
 
 Хеш сравнивай с `md5sum` / `sha256sum` (первая колонка). Строку целиком (`(stdin)=`, `MD5 (file) =`) с ними не сравнивай: формат у `ft_ssl` свой.
 
+Все проверки из разделов 5–11 собраны в один скрипт:
+
+```bash
+tests/run_tests.sh              # сборка, формат, хеши, ошибки, stdin, whirlpool, утечки
+tests/run_tests.sh -v           # то же, но с командой и выводом каждого теста
+tests/run_tests.sh --no-build   # не трогать make, взять готовый ./ft_ssl
+tests/run_tests.sh --no-leaks   # без valgrind / leaks
+```
+
+Тесты идут во временном каталоге, в проекте ничего не остаётся. Код возврата `0`, если всё прошло, и `1`, если есть ошибки.
+
 ## 1. Что понадобится
 
 - Около 25 ГБ на диске и минимум 4 ГБ RAM под гостевую систему. С 2 ГБ установщик Ubuntu Desktop зависает на логотипе или чёрном экране.
@@ -59,7 +70,11 @@ sha256sum --version
 valgrind --version
 ```
 
-`openssl dgst -whirlpool` на OpenSSL 3 в Ubuntu не работает. Для Whirlpool ориентир — векторы в разделе 10.
+В OpenSSL 3 Whirlpool вынесен в провайдер `legacy`, поэтому просто `openssl dgst -whirlpool` выдаёт ошибку. Эталон для сверки:
+
+```bash
+printf 'abc' | openssl dgst -whirlpool -provider legacy -provider default
+```
 
 ## 4. Перенести проект
 
@@ -387,9 +402,9 @@ printf '\nfoobar\nexit\n' | ./ft_ssl
 ```
 
 ```text
-19fa61d75522a4669b44e39c1d2e1726c530232130d407f89afee0964997f7a73e83be698b288febcf88e3e03c4f1280f9ac12dce4ecd82c5be59e401b8e501d
-8aca2602792aec6f11a67206531fb8ac4a2a76f9ad18c47a7541565973c0a04d0d5f13e688b6abd56c006191ff52204943301740c46207ea21bd67a3363bac65
-4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cb70c4afc72894b03123cec4a76917a3e826
+19fa61d75522a4669b44e39c1d2e1726c530232130d407f89afee0964997f7a73e83be698b288febcf88e3e03c4f0757ea8964e59b63d93708b138cc42a66eb3
+8aca2602792aec6f11a67206531fb7d7f0dff59413145e6973c45001d0087b42d11bc645413aeff63a42391a39145a591a92200d560195e53b478584fdae231a
+4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cbd6c797fc9d95d8b582d225292076d4eef5
 ```
 
 Формат без `-q` такой же, как у md5 и sha256:
@@ -399,7 +414,7 @@ printf '\nfoobar\nexit\n' | ./ft_ssl
 ```
 
 ```text
-WHIRLPOOL ("abc") = 4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cb70c4afc72894b03123cec4a76917a3e826
+WHIRLPOOL ("abc") = 4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c57e277d0e34957114cbd6c797fc9d95d8b582d225292076d4eef5
 ```
 
 ## 11. Утечки
